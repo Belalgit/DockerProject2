@@ -26,10 +26,10 @@ jobs:
 
       - name: Build and tag Docker image 
         run: |
-          docker build -t 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:latest .
-          docker tag 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:latest 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:$(git rev-parse --short HEAD)
+          docker build -t 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest .
+          docker tag 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:$(git rev-parse --short HEAD)
 
       - name: Push Docker image to ECR
         run: |
-          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:latest
-          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:$(git rev-parse --short HEAD)
+          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest
+          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
