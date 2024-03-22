@@ -24,7 +24,7 @@ jobs:
         run: |
           aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com/local
 
-      - name: Build and tag Docker image
+      - name: Build and tag Docker image 
         run: |
           docker build -t 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:latest .
           docker tag 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:latest 922799470279.dkr.ecr.us-east-1.amazonaws.com/local/local:$(git rev-parse --short HEAD)
