@@ -34,3 +34,22 @@ jobs:
           docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest
           docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
       
+      - name: Deploy to EC2 instance
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: example-node-app
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_DEFAULT_REGION: us-east-1
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            sudo apt update
+            sudo apt install docker.io -y
+            sudo apt install awscli -y
+            sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com
+            sudo docker stop local || true
+            sudo docker rm local || true
+            sudo docker pull 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:5f7bdcd
