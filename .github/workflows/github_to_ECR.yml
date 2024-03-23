@@ -33,3 +33,5 @@ jobs:
         run: |
           docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest
           docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
+      - name: Pull to EC2 instance
+        runs-on: self-hosted
