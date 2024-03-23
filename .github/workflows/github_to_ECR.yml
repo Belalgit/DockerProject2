@@ -1,55 +1,70 @@
-name: Build and push to ECR
+name: Docker Build and push to ECR
 
 on:
   push: 
-    branches:
-      - main
+    branches: [ "master"]
 
 jobs:
   build-and-push:
-    runs-on: self hosted
+    name: Build Docker Image
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials for ECR
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
 
       - name: Login to AWS ECR
-        run: |
-          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com/local
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+#        run: |
+#          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com/local
 
-      - name: Build and tag Docker image 
-        run: |
-          docker build -t 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest .
-          docker tag 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
-
-      - name: Push Docker image to ECR
-        run: |
-          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest
-          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
-      
-      - name: Deploy to EC2 instance
+      - name: Build and push the tagged docker image to AWS ECR 
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: example-node-app
-          IMAGE_TAG: ${{ github.sha }}
-          AWS_DEFAULT_REGION: us-east-1
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
+          IMAGE_TAG: latest
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+#        run: |
+#          docker build -t 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest .
+#          docker tag 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
+
+      - name: executing remote ssh commands using password
         uses: appleboy/ssh-action@master
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
+          IMAGE_TAG: latest   
         with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
-            sudo apt update
-            sudo apt install docker.io -y
-            sudo apt install awscli -y
-            sudo aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com
-            sudo docker stop local || true
-            sudo docker rm local || true
-            sudo docker pull 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:5f7bdcd
+            aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID
+            aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY
+            aws configure set default.region > echo $AWS_REGION
+            aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com
+            sudo docker rm -f `sudo docker ps -q` 
+            sudo docker run -d -p 8080:8080 $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+            host: ${{ secrets.EC2_PUB_IP }}
+            username: ec2-user
+            key: ${{ secrets.EC2_PRIVATE_KEY}}
+            port: 22
+            envs: 
+              AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG h
+
+#      - name: Push Docker image to ECR
+#        run: |
+#          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:latest
+#          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/local:$(git rev-parse --short HEAD)
+      
