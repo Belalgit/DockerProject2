@@ -85,4 +85,4 @@ jobs:
             sudo apt install awscli -y
             sudo docker stop webapp || true
             sudo docker rm webapp || true
-            sudo docker run -d --name webapp -p 8080:8080 $REGISTRY/$REPOSITORY:$IMAGE_TAG
+            sudo docker run -d --name webapp -p 8080:80 $REGISTRY/$REPOSITORY:$IMAGE_TAG
