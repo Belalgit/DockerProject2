@@ -71,7 +71,6 @@ jobs:
           script:
             docker stop webapp || true
             docker rm webapp || true
-            docker pull ${{ secret}}
             sudo $(aws ecr get-login --no-include-email --region us-east-1);
             sudo docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
             sudo docker run -d --name myappcontainer -p 8080:8080 $REGISTRY/$REPOSITORY:$IMAGE_TAG
