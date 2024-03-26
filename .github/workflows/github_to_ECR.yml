@@ -59,18 +59,18 @@ jobs:
             
       - name: Pull Docker image from ECR
         env:
-          REGISTRY: 922799470279.dkr.ecr.us-east-1.amazonaws.com/webapp
-          REPOSITORY: latest
-          IMAGE_TAG: ${{ github.sha }}
+          REGISTRY: 922799470279.dkr.ecr.us-east-1.amazonaws.com
+          REPOSITORY: webapp
+          IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to EC2;Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: 922799470279.dkr.ecr.us-east-1.amazonaws.com
           REPOSITORY: webapp
-          IMAGE_TAG: ${{ github.sha }}
+          IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
           ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUB_IP }} 'sudo apt update && sudo apt install docker.io awscli -y'
