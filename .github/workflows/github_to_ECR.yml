@@ -68,7 +68,7 @@ jobs:
 
       - name: Deploy to EC2;Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
           REPOSITORY: ${{secrets.AWS_ECR_REPO}}
           IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
