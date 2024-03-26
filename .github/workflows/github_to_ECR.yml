@@ -59,7 +59,7 @@ jobs:
             
       - name: Pull Docker image from ECR
         env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REGISTRY: 922799470279.dkr.ecr.us-east-1.amazonaws.com
           REPOSITORY: webapp
           IMAGE_TAG: ${{ github.sha }}
           AWS_REGION: ${{ secrets.AWS_REGION}}
