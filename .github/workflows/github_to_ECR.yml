@@ -58,21 +58,21 @@ jobs:
             AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG 
             
       - name: Pull Docker image from ECR
-      env:
-        REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        REPOSITORY: webapp
-        IMAGE_TAG: ${{ github.sha }}
-        AWS_REGION: ${{ secrets.AWS_REGION}}
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: webapp
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2;Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
+        env:
+          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          REPOSITORY: webapp
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
-          # Install Docker and AWS CLI on EC2 instance
           ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUB_IP }} 'sudo apt update && sudo apt install docker.io awscli -y'
-
-          # Stop and remove existing container
           ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUB_IP }} 'sudo docker stop webapp || true && sudo docker rm webapp || true'
-
-          # Run the new container
           ssh -i ${{ secrets.EC2_PRIVATE_KEY }} ${{ secrets.EC2_USERNAME }}@${{ secrets.EC2_PUB_IP }} 'sudo docker run -d --name webapp -p 8080:8080 $REGISTRY/$REPOSITORY:$IMAGE_TAG'
