@@ -10,7 +10,7 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
+      - name: Checkout code, outside from code
         uses: actions/checkout@v2
 
       - name: Configure AWS credentials for ECR
@@ -31,7 +31,7 @@ jobs:
           IMAGE_TAG: latest
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push 922799470279.dkr.ecr.us-east-1.amazonaws.com/webapp:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: executing remote ssh commands using password & Push Docker Image to ECR
         uses: appleboy/ssh-action@master
