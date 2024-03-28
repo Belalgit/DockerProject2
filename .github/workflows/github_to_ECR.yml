@@ -64,6 +64,7 @@ jobs:
         run: |
           docker system prune --force
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          docker rmi $REGISTRY/$REPOSITORY:none --force
 
       - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
         env:
