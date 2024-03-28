@@ -62,8 +62,8 @@ jobs:
           IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
-          # docker rmi $ECR_REGISTRY/$ECR_REPOSITORY:none --force
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker rmi $REGISTRY/$REPOSITORY:none --force
+          docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
         env:
