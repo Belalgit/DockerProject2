@@ -62,8 +62,8 @@ jobs:
           IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
-          #docker rmi $REGISTRY/$REPOSITORY:none --force
-          docker images -q -a | xargs docker inspect --format='{{.Id}}{{range $rt := .RepoTags}} {{$rt}} {{end}}'|grep -v ':'
+          docker rmi $REGISTRY/$REPOSITORY:none --force
+          docker images -a | grep none | awk '{ print $3; }' | xargs docker rmi
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
