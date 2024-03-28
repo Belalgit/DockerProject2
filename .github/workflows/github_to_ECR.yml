@@ -63,7 +63,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
           docker stop webapp || true
-          docker system prune --force
+          docker system prune --force 
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
       - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
