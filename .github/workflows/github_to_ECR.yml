@@ -62,7 +62,7 @@ jobs:
           IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
-          docker rmi $REGISTRY/$REPOSITORY:none --force
+          #docker rmi $REGISTRY/$REPOSITORY:none --force
           docker images -q -a | xargs docker inspect --format='{{.Id}}{{range $rt := .RepoTags}} {{$rt}} {{end}}'|grep -v ':'
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
