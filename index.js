@@ -4,7 +4,7 @@ const port = 8080
 const hostname = '127.0.0.1';
 
 app.get('/', (req, res) => {
-  res.send('Hello World! This is a Docker project1 for Begineers. Build=>Push ECR=>Pull EC2=>Deploy to EC2.')
+  res.send('Hello World! This is a Docker project1 for Begineers. Build=>Push ECR=>Pull EC2=>Deploy to EC2. Life is chill')
 })
 
 app.listen(port, () => {
