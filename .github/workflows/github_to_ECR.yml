@@ -62,9 +62,9 @@ jobs:
           IMAGE_TAG: latest
           AWS_REGION: ${{ secrets.AWS_REGION}}
         run: |
+          docker stop webapp || true
           docker system prune --force
           docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
-          docker rmi $(docker images --format '{{.ID}}' --filter=dangling=true)
 
       - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
         env:
@@ -83,6 +83,6 @@ jobs:
             sudo apt update
             sudo apt install docker.io -y
             sudo apt install awscli -y
-            sudo docker stop webapp || true
+            #sudo docker stop webapp || true
             sudo docker rm webapp || true
             sudo docker run -d --name webapp -p 8080:8080 $REGISTRY/$REPOSITORY:$IMAGE_TAG
