@@ -23,10 +23,8 @@ jobs:
       - name: Login to AWS ECR 
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
-        with:
-          mask-password: 'false'
 
-      - name: Build image and push the tagged image to AWS ECR 
+      - name: Build image and push the tagged image to AWS ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
           ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
