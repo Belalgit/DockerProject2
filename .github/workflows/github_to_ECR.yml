@@ -55,7 +55,7 @@ jobs:
           envs: 
             AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG 
             
-      - name: Pull image from ECR
+      - name: Pull image from ECR to EC2. remove previoud images from EC2
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{secrets.AWS_ECR_REPO}}
