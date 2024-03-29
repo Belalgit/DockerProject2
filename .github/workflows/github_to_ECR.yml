@@ -24,7 +24,7 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Build and push the tagged docker image to AWS ECR 
+      - name: Build image and push the tagged image to AWS ECR 
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
           ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
@@ -32,57 +32,3 @@ jobs:
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-
-      - name: Login EC2 using remote SSH 
-        uses: appleboy/ssh-action@master
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{secrets.AWS_ECR_REPO}}
-          IMAGE_TAG: latest   
-        with:
-          script: |
-            aws configure set aws_access_key_id > echo $AWS_ACCESS_KEY_ID
-            aws configure set aws_secret_access_key > echo $AWS_SECRET_ACCESS_KEY
-            aws configure set default.region > echo $AWS_REGION
-            aws ecr get-login-password --region us-east-1 | sudo docker login --username AWS --password-stdin 922799470279.dkr.ecr.us-east-1.amazonaws.com
-          host: ${{ secrets.EC2_PUB_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY}}
-          port: 22
-          envs: 
-            AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY,AWS_REGION,ECR_REGISTRY,ECR_REPOSITORY,IMAGE_TAG 
-            
-      - name: Pull image from ECR to EC2. remove previoud images from EC2
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          REPOSITORY: ${{secrets.AWS_ECR_REPO}}
-          IMAGE_TAG: latest
-          AWS_REGION: ${{ secrets.AWS_REGION}}
-        run: |
-          docker stop webapp || true
-          docker system prune --force 
-          docker pull $REGISTRY/$REPOSITORY:$IMAGE_TAG
-
-      - name: Deploy to EC2; Install Docker and AWS CLI on EC2 instance;Stop and remove existing container; Run the new container
-        env:
-          REGISTRY: ${{ steps.login-ecr.outputs.registry }} 
-          REPOSITORY: ${{secrets.AWS_ECR_REPO}}
-          IMAGE_TAG: latest
-          AWS_REGION: ${{ secrets.AWS_REGION}}
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.EC2_PUB_IP }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_PRIVATE_KEY }}
-          envs: 
-              EC2_PRIVATE_KEY,EC2_PUB_IP,REGISTRY,REPOSITORY,IMAGE_TAG,AWS_REGION
-          script: |
-            sudo apt update
-            sudo apt install docker.io -y
-            sudo apt install awscli -y
-            sudo docker stop webapp || true
-            sudo docker rm webapp || true
-            sudo docker run -d --name webapp -p 8080:8080 $REGISTRY/$REPOSITORY:$IMAGE_TAG
