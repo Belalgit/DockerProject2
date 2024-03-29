@@ -1,3 +1,5 @@
+**Backend app=>Docker Build=> AWS ECR; New repo: ECR=> EKS**
+
 1. Create an Application source code using NodeJS
    
 2. Check the source code locally using VSCode
