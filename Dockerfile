@@ -11,6 +11,6 @@ RUN npm install
 #source will be current location(.); dest will be current working directory(.)
 COPY . .  
 #Open the port 3000
-EXPOSE 8080
+EXPOSE 8040
 #node server; file name:index.js
 CMD ["node","index.js"]
