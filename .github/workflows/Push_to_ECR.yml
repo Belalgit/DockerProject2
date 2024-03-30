@@ -10,7 +10,7 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code, get out from code
+      - name: Checkout code, get out from code 
         uses: actions/checkout@v2
 
       - name: Configure AWS credentials for ECR
