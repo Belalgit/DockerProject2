@@ -7,7 +7,7 @@ on:
 jobs:
   build-and-push:
     name: Build Docker Image
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code, get out from code 
